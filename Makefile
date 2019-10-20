@@ -1,4 +1,4 @@
-CXXFLAGS = -g -O2 -Wall -fmessage-length=0 -std=c++11
+CXXFLAGS = -g -Og -Wall -fmessage-length=0 -std=c++11
 
 CXX = g++ 
 

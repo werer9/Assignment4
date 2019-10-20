@@ -40,37 +40,52 @@ TEST_F(PlatoonTest, test_get_head)
 TEST_F(PlatoonTest, test_insert) 
 {
     platoon->insert(carVector->at(3));
-    Car *car = platoon->get_tail();
+    Car *car = platoon->get_head();
     ASSERT_NE(nullptr, car);
     bool wasInserted = false;
-    do {
+    while (car != nullptr) {
         if (car == carVector->at(3)) {
             wasInserted = true;
             break;
         }
-        car = car->get_next();
-    } while (car != nullptr);
+        car = car->get_prev();
+    } 
 
     ASSERT_TRUE(wasInserted);
 
     platoon->insert(carVector->at(1));
     platoon->insert(carVector->at(9));
 
-    GTEST_ASSERT_LT(platoon->get_tail()->get_position(), platoon->get_tail()->get_next()->get_position());
+    ASSERT_EQ(platoon->get_tail(), carVector->at(9));
+    ASSERT_EQ(platoon->get_head(), carVector->at(1));
+    ASSERT_EQ(platoon->get_head()->get_prev(), carVector->at(3));
+    ASSERT_EQ(platoon->get_tail()->get_next(), carVector->at(3));
 }
 
 TEST_F(PlatoonTest, test_append) 
 {
+    platoon->insert(carVector->at(1));
+    platoon->insert(carVector->at(8));
     platoon->append(carVector->at(2));
+
     ASSERT_NE(nullptr, platoon->get_tail());
-    ASSERT_EQ(carVector->at(2), platoon->get_tail());
+    ASSERT_EQ(carVector->at(8), platoon->get_tail());
+
+    platoon->append(carVector->at(9));
+    ASSERT_EQ(carVector->at(9), platoon->get_tail());
 }
 
 TEST_F(PlatoonTest, test_prepend) 
 {
-    platoon->prepend(carVector->at(7));
-    ASSERT_NE(nullptr, platoon->get_head());
-    ASSERT_EQ(carVector->at(7), platoon->get_head());
+    platoon->insert(carVector->at(2));
+    platoon->insert(carVector->at(9));
+    platoon->prepend(carVector->at(3));
+
+    ASSERT_NE(nullptr, platoon->get_tail());
+    ASSERT_EQ(carVector->at(2), platoon->get_head());
+
+    platoon->prepend(carVector->at(1));
+    ASSERT_EQ(carVector->at(1), platoon->get_head());
 }
 
 TEST_F(PlatoonTest, test_remove) 
@@ -85,10 +100,10 @@ TEST_F(PlatoonTest, test_remove)
     removeCar = removeCar->get_prev();
     platoon->remove(removeCar);
     Car* car = platoon->get_head();
-    do {
+    while (car != nullptr) {
         ASSERT_NE(car, removeCar);
         car = car->get_next();
-    } while (car != nullptr);
+    }
 }
 
 TEST_F(PlatoonTest, test_searches)
