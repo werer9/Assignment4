@@ -51,7 +51,7 @@ Car* Platoon::get_head()
 void Platoon::remove(Car* c)
 {
 	// iterate through platoon
-	Car *car = this->get_tail();
+	Car *car = tail;
 	while (car != nullptr) {
 		// check if car is equal to c, the car to be removed
 		if (car == c) {
@@ -95,9 +95,26 @@ void Platoon::insert(Car* c)
 	// if so set to prepend or append otherwise, insert normally
 	if (c->get_position() > head->get_position()) {
 		prepend(c);
-	} else if (c->get_position < tail->get_position()) {
+		return;
+	} else if (c->get_position() < tail->get_position()) {
 		append(c);
+		return;
 	} else {
-		
+		Car *car = tail->get_prev();
+		while (car != nullptr) {
+			// if c has a smaller position than car
+			if (car->get_position() > c->get_position()) {
+				// insert it as car's next pointer
+				// and make car's previous pointer's previous pointer 
+				// point to c then make c point to car's old next and previous points to car
+				c->set_next(car->get_next());
+				c->set_prev(car);
+				c->get_prev()->set_prev(c);
+				car->set_next(c);
+				return;
+			}
+			// keep looping
+			car = car->get_prev();
+		}
 	}
 }
