@@ -22,20 +22,20 @@ void Car::set_position(int pos)
 
 void Car::set_next(Car* v)
 {
-    this->next = v;
+    next = v;
 }
 
 void Car::set_prev(Car* v)
 {
-    this->prev = v;
+    prev = v;
 }
 
 Car* Car::get_next()
 {
-    return this->next;
+    return next;
 }
 
 Car* Car::get_prev()
 {
-    return this->prev;
+    return prev;
 }

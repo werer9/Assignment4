@@ -19,12 +19,6 @@ class Platoon
         Car* get_tail();
         Car* get_head();
 
-        void remove(Car* c); 
-        void append(Car* c); 
-        void prepend(Car* c); 
-        void insert(Car* c);
-        Car *search(int id);
-        Car *searchPos(int pos);
         /* 
         you may create methods below
         For example, something like:

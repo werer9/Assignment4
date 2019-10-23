@@ -13,11 +13,6 @@ SimulationUI::SimulationUI(string filename)
 	cout << "Simulation has started" << endl;
 }
 
-SimulationUI::~SimulationUI()
-{
-	
-}
-
 /*
  * Extracts the maximum time information from the input file
  * Returns the max time value (int)

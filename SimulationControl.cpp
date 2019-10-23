@@ -8,9 +8,7 @@ SimulationControl::SimulationControl()
 
 SimulationControl::~SimulationControl()
 {
-	// delete memory on heap
-	delete model;
-	delete view;
+	// TODO: destructor
 }
 
 bool SimulationControl::run()

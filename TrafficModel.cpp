@@ -38,77 +38,7 @@ int TrafficModel::get_lane_change_command(int id)
  */
 void TrafficModel::update()
 {
-	vector<int> ids;
-	vector<int> dirs;
-
-	ids.clear();
-	dirs.clear();
-
-	for (unsigned int i = 0; i < commands.size(); i++) {
-		string id_substr = commands[i].substr(0, commands[i].find(","));
-		string dir_substr = commands[i].substr(commands[i].find(",")+1);
-		int id;
-		int dir;
-		istringstream(id_substr) >> id;
-		istringstream(dir_substr) >> dir;
-		ids.push_back(id);
-		dirs.push_back(dir);
-	}
-
-	for (unsigned i = 0; i < platoons.size(); i++) {
-		Car *car = platoons[i].get_tail();
-		while (car != nullptr) {
-			bool idFound = false;
-			int idIndex;
-
-			for (unsigned j = 0; j < ids.size(); j++) {
-				if (ids[j] == car->get_id()) {
-					idFound = true;
-					idIndex = j;
-					break;
-				}
-			}
-
-			if (idFound) {
-				if ((dirs[idIndex] == 1 && i == 0) || (dirs[idIndex] == 2 && i == platoons.size() - 1)) {
-					car->set_position(car->get_position()+1);
-					car = car->get_next();
-				} else if (dirs[idIndex] == 0) {
-					car = car->get_next();
-				} else {
-					if (dirs[idIndex] == 1) {
-						if (platoons[i-1].searchPos(car->get_position()) == nullptr) {
-							Car *temp = car->get_next();
-							platoons[i].remove(car);
-							platoons[i-1].insert(car);
-							car = temp;
-						} else {
-							car->set_position(car->get_position()+1);
-							car = car->get_next();
-						}
-					} else if (dirs[idIndex] == 2) {
-						if (platoons[i+1].searchPos(car->get_position()) == nullptr) {
-							Car* temp = car->get_next();
-							platoons[i].remove(car);
-							platoons[i+1].insert(car);
-							car = temp;
-							dirs[idIndex] = 0;
-						} else {
-							car->set_position(car->get_position()+1);
-							car = car->get_next();
-						}
-					} else {
-						car->set_position(car->get_position()+1);
-						car = car->get_next();
-					}
-				}
-			} else {
-				car->set_position(car->get_position()+1);
-				car = car->get_next();
-			}
-		}
-
-	}
+	// TODO: complete this function
 }
 
 
@@ -137,7 +67,7 @@ vector<string> TrafficModel::get_system_state()
 		while (temp != NULL){
 			out << ";(" << temp->get_id() << "," << i << "," << temp->get_position() << \
 					 "," << get_lane_change_command(temp->get_id()) << ")";
-			temp = temp->get_next();
+			temp = temp->get_prev();
 		}
 
 		output.push_back(out.str());
