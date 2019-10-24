@@ -63,23 +63,30 @@ void TrafficModel::update()
 		Car *car = platoons[i].get_head();
 		Car *temp = nullptr;
 		while (car != nullptr) {
+			// check which command is being executed on the car
 			switch (get_lane_change_command(car->get_id())) {
+				// go straight
 				case 0:
 					update_position(car);
 					break;
+				// change lane to the left if it is available and command not yet exectuted
 				case 1:
 					if (is_command_complete(car->get_id())) {
 						break;
 					} else if (i == 0 || !platoons[i-1].is_position_empty(car->get_position())) {
 						update_position(car);
 					} else {
+						// get next car and store it in temporary pointer
 						temp = car->get_next();
+						// change lanes
 						platoons[i].remove(car);
 						platoons[i-1].insert(car);
+						// mark lane change completed in executed_commands vector
 						executed_commands.push_back(car->get_id());
 					}
 					break;
 				case 2:
+					// change lane to the right if it is available and command not yet exectuted
 					if (is_command_complete(car->get_id())) {
 						break;
 					} else if (i == platoons.size()-1 || !platoons[i+1].is_position_empty(car->get_position())) {
@@ -95,7 +102,9 @@ void TrafficModel::update()
 					break;
 			}
 
+			// clear executed commans vector for next tick
 			executed_commands.empty();
+			// if a lange change has occured, pass next car through temp
 			if (temp != nullptr) {
 				car = temp;
 				temp = nullptr;
