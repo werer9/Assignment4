@@ -18,6 +18,23 @@ class TrafficModel
 	private:
 		vector<Platoon> platoons;
 		vector<string> commands; // stores a set of lane change commands
+		vector<int> executed_commands; // ids of cars that have had their command executed
+
+		/**
+		 * @brief Increment the position of a car, c
+		 * 
+		 * @param c 
+		 */
+		void update_position(Car *c);
+
+		/**
+		 * @brief Checks if car id is in list of cars that have changes lanes
+		 * 
+		 * @param id 
+		 * @return true 
+		 * @return false 
+		 */
+		bool is_command_complete(int id);
 
 	public:
 		TrafficModel();

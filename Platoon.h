@@ -67,5 +67,14 @@ class Platoon
          * 
         */
         void insert(Car* c);
+        
+        /**
+         * @brief Return true if position, pos, in the platoon is vacant
+         * 
+         * @param pos 
+         * @return true 
+         * @return false 
+         */
+        bool is_position_empty(int pos);
 };
 #endif
