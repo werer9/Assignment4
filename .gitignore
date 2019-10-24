@@ -1,0 +1,4 @@
+*.o
+result.txt
+correctresult.txt
+input.txt

@@ -1,4 +1,4 @@
-CXXFLAGS = -g -Og -Wall -fmessage-length=0 -std=c++11
+CXXFLAGS = -g -O2 -Wall -fmessage-length=0 -std=c++11
 
 CXX = g++ 
 
@@ -11,9 +11,6 @@ all:	$(TARGET)
 
 $(TARGET):	$(OBJS)
 	$(CXX) -o $(TARGET) $(OBJS)
-
-debug:
-	$(CXX) -g -D_DEBUG -o $(TARGET) test.cpp $(SRCS) -lgtest -lgtest_main
 	
 clean:
 	rm -f $(OBJS) $(TARGET)

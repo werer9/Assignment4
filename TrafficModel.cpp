@@ -3,6 +3,25 @@
 TrafficModel::TrafficModel() { }
 TrafficModel::~TrafficModel(){ }
 
+void TrafficModel::update_position(Car *c)
+{
+	if (c == nullptr)
+		return;
+	if (c->get_prev() == nullptr || c->get_prev()->get_position() != c->get_position()+1) {
+		c->set_position(c->get_position()+1);
+	}
+}
+
+bool TrafficModel::is_command_complete(int id) {	
+	for (unsigned i = 0; i < executed_commands.size(); i++) {
+		if (id == executed_commands[i]) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void TrafficModel::set_commands(vector<string> commands)
 {
 	this->commands = commands;
@@ -38,76 +57,52 @@ int TrafficModel::get_lane_change_command(int id)
  */
 void TrafficModel::update()
 {
-	vector<int> ids;
-	vector<int> dirs;
-
-	ids.clear();
-	dirs.clear();
-
-	for (unsigned int i = 0; i < commands.size(); i++) {
-		string id_substr = commands[i].substr(0, commands[i].find(","));
-		string dir_substr = commands[i].substr(commands[i].find(",")+1);
-		int id;
-		int dir;
-		istringstream(id_substr) >> id;
-		istringstream(dir_substr) >> dir;
-		ids.push_back(id);
-		dirs.push_back(dir);
-	}
-
+	// iterate over the platoons in the model
 	for (unsigned i = 0; i < platoons.size(); i++) {
-		Car *car = platoons[i].get_tail();
+		// iterate over the platoon
+		Car *car = platoons[i].get_head();
+		Car *temp = nullptr;
 		while (car != nullptr) {
-			bool idFound = false;
-			int idIndex;
-
-			for (unsigned j = 0; j < ids.size(); j++) {
-				if (ids[j] == car->get_id()) {
-					idFound = true;
-					idIndex = j;
+			switch (get_lane_change_command(car->get_id())) {
+				case 0:
+					update_position(car);
 					break;
-				}
+				case 1:
+					if (is_command_complete(car->get_id())) {
+						break;
+					} else if (i == 0 || !platoons[i-1].is_position_empty(car->get_position())) {
+						update_position(car);
+					} else {
+						temp = car->get_next();
+						platoons[i].remove(car);
+						platoons[i-1].insert(car);
+						executed_commands.push_back(car->get_id());
+					}
+					break;
+				case 2:
+					if (is_command_complete(car->get_id())) {
+						break;
+					} else if (i == platoons.size()-1 || !platoons[i+1].is_position_empty(car->get_position())) {
+						update_position(car);
+					} else {
+						temp = car->get_next();
+						platoons[i].remove(car);
+						platoons[i+1].insert(car);
+						executed_commands.push_back(car->get_id());
+					}
+					break;
+				default:
+					break;
 			}
 
-			if (idFound) {
-				if ((dirs[idIndex] == 1 && i == 0) || (dirs[idIndex] == 2 && i == platoons.size() - 1)) {
-					car->set_position(car->get_position()+1);
-					car = car->get_next();
-				} else if (dirs[idIndex] == 0) {
-					car = car->get_next();
-				} else {
-					if (dirs[idIndex] == 1) {
-						if (platoons[i-1].searchPos(car->get_position()) == nullptr) {
-							Car *temp = car->get_next();
-							platoons[i].remove(car);
-							platoons[i-1].insert(car);
-							car = temp;
-						} else {
-							car->set_position(car->get_position()+1);
-							car = car->get_next();
-						}
-					} else if (dirs[idIndex] == 2) {
-						if (platoons[i+1].searchPos(car->get_position()) == nullptr) {
-							Car* temp = car->get_next();
-							platoons[i].remove(car);
-							platoons[i+1].insert(car);
-							car = temp;
-							dirs[idIndex] = 0;
-						} else {
-							car->set_position(car->get_position()+1);
-							car = car->get_next();
-						}
-					} else {
-						car->set_position(car->get_position()+1);
-						car = car->get_next();
-					}
-				}
+			executed_commands.empty();
+			if (temp != nullptr) {
+				car = temp;
+				temp = nullptr;
 			} else {
-				car->set_position(car->get_position()+1);
 				car = car->get_next();
 			}
 		}
-
 	}
 }
 
@@ -137,7 +132,7 @@ vector<string> TrafficModel::get_system_state()
 		while (temp != NULL){
 			out << ";(" << temp->get_id() << "," << i << "," << temp->get_position() << \
 					 "," << get_lane_change_command(temp->get_id()) << ")";
-			temp = temp->get_next();
+			temp = temp->get_prev();
 		}
 
 		output.push_back(out.str());

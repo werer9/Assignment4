@@ -22,7 +22,21 @@ Platoon::Platoon(string init)
 			s2 >> pos_value;
 			Car* car = new Car(id_value, pos_value);
 
-            this->insert(car);
+			// use insert function
+			insert(car);
+
+            // if (head == NULL)
+            // {
+            //     head = car;
+            //     tail = car;
+            // }
+            // else
+            // {
+            //     tail->set_next(car);
+            //     car->set_prev(tail);
+            //     tail = car;
+            //     car->set_next(NULL);
+            // }
 		}
 	}
 }
@@ -39,118 +53,109 @@ Car* Platoon::get_head()
 
 void Platoon::remove(Car* c)
 {
-	if (c == head) {
-		head = c->get_prev();
-		head->set_next(nullptr);
+	if (c == head && head == tail) {
+		head = nullptr;
+		tail = nullptr;
+		c->set_next(nullptr);
+		c->set_prev(nullptr);
+	} else if (c == head) {
+		c->get_next()->set_prev(nullptr);
+		head = c->get_next();
+		c->set_next(nullptr);
+		c->set_prev(nullptr);
 	} else if (c == tail) {
-		tail = c->get_next();
-		tail->set_prev(nullptr);
+		c->get_prev()->set_next(nullptr);
+		tail = c->get_prev();
+		c->set_prev(nullptr);
+		c->set_next(nullptr);
 	} else {
-		Car *temp = tail;
-		while (temp != nullptr) {
-			if (temp == c) {
-				temp->get_next()->set_prev(temp->get_prev());
-				temp->get_prev()->set_next(temp->get_next());
-				break;
+		// iterate through platoon
+		Car *car = tail;
+		while (car != nullptr) {
+			// check if car is equal to c, the car to be removed
+			if (car == c) {
+				// set c previous pointer to next car
+				car->get_next()->set_prev(car->get_prev());
+				// set c next pointer to previous car
+				car->get_prev()->set_next(car->get_next());
+				// set c next and previous pointer to null
+				car->set_prev(nullptr);
+				car->set_next(nullptr);
 			}
-			temp = temp->get_next();
+
+			// move onto previous car
+			car = car->get_prev();
 		}
 	}
-
-	c->set_next(nullptr);
-	c->set_prev(nullptr);
 }
 
 void Platoon::append(Car* c)
 {
-	if (c->get_position() > this->get_tail()->get_position()) {
-		this->insert(c);
-	}
+	// set tail next pointer to c, the new tail
+	tail->set_next(c);
+	// set c previous pointer to the old tail
+	c->set_prev(tail);
+	// set c next pointer to null
+	c->set_next(nullptr);
+	// set tail to c
+	tail = c;
 }
 
 void Platoon::prepend(Car* c)
 {
-	if (c->get_position() < this->get_head()->get_position()) {
-		this->insert(c);
-	}
+	// set the new head to c
+	head->set_prev(c);
+	c->set_next(head);
+	head = c;
 }
 
 void Platoon::insert(Car* c)
 {
 	if (tail == nullptr && head == nullptr) {
-		head = c;
 		tail = c;
+		head = c;
+		c->set_next(nullptr);
+		c->set_prev(nullptr);
+	}	
+	
+	// check if c has larger position than head or smaller than tail
+	// if so set to prepend or append otherwise, insert normally
+	else if (c->get_position() > head->get_position()) {
+		prepend(c);
+		return;
+	} else if (c->get_position() < tail->get_position()) {
+		append(c);
 		return;
 	} else {
-		if (tail == head) {
-			if (c->get_position() < head->get_position()) {
-				head = c;
-				c->set_prev(tail);
-				c->set_next(nullptr);
-				tail->set_next(head);
-				tail->set_prev(nullptr);
-				return;
-			} else {
-				tail = c;
-				c->set_prev(nullptr);
-				c->set_next(head);
-				head->set_prev(tail);
-				head->set_next(nullptr);
+		Car *car = tail->get_prev();
+		while (car != nullptr) {
+			// if c has a smaller position than car
+			if (car->get_position() > c->get_position()) {
+				// insert it as car's next pointer
+				// and make car's previous pointer's previous pointer 
+				// point to c then make c point to car's old next and previous points to car
+				c->set_next(car->get_next());
+				c->set_prev(car);
+				c->get_next()->set_prev(c);
+				car->set_next(c);
 				return;
 			}
-		} else {
-			if (c->get_position() > tail->get_position()) {
-				tail->set_prev(c);
-				c->set_next(tail);
-				tail = c;
-				return;
-			} else if (c->get_position() < head->get_position()) {
-				head->set_next(c);
-				c->set_prev(head);
-				head = c;
-				return;
-			}
-			Car *temp = tail;
-			while (temp != nullptr) {
-				if (c->get_position() > temp->get_position()) {
-					c->set_prev(temp->get_prev());
-					c->get_prev()->set_next(c);
-					c->set_next(temp);
-					temp->set_prev(c);
-					return;
-				}
-
-				temp = temp->get_next();
-			}
+			// keep looping
+			car = car->get_prev();
 		}
 	}
-	
 }
 
-Car *Platoon::search(int id)
+bool Platoon::is_position_empty(int pos)
 {
-	
-	Car *car = this->get_tail();
+	Car *car = head;
 	while (car != nullptr) {
-		if (car->get_id() == id) {
-			return car;
-		}
+		// return false if car is in position, pos
+		if (car->get_position() == pos)
+			return false;
 		car = car->get_next();
 	}
 
-	return car;
-	
-}
-
-Car *Platoon::searchPos(int pos)
-{
-	Car *car = this->get_tail();
-	while (car != nullptr) {
-		if (car->get_position() == pos) {
-			return car;
-		}
-		car = car->get_next();
-	} 
-
-	return car;
+	// if loop finishes iterating, return true
+	return true;
 }
